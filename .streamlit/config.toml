@@ -1,0 +1,8 @@
+# Design "Klinik" - kuehles Weiss, blaugraue Struktur, nuechtern
+# Passend zu den Diagrammfarben in app/charts.py und app/export_pdf.py
+[theme]
+base = "light"
+primaryColor = "#2C5F8A"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F6F9"
+textColor = "#22303C"

@@ -1,0 +1,57 @@
+[project]
+name = "gesundheitsdashboard"
+version = "0.1.0"
+description = "Auswertung von Apple-Health-Exporten: Langzeitverläufe, Referenzbereiche, EKG und Arztbericht"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+keywords = ["apple-health", "healthkit", "quantified-self", "ekg", "streamlit"]
+
+dependencies = [
+    "streamlit>=1.30",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "altair>=5.0",
+    "matplotlib>=3.7",
+    "reportlab>=4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "W",    # warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "SIM",  # simplify
+]
+ignore = [
+    # Streamlit-Seiten brauchen Modul-Ebene Code nach dem sys.path-Eintrag,
+    # damit die Imports der Nachbarmodule funktionieren
+    "E402",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests dürfen Vergleiche und Konstrukte enthalten, die im Produktivcode
+# unsauber wären
+"tests/*" = ["B011"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

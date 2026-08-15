@@ -1,0 +1,33 @@
+# Gesundheitsdaten - dürfen niemals ins Repository
+data/
+imports/
+exports/
+*.db
+*.sqlite
+*.sqlite3
+Export.zip
+apple_health_export/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Werkzeuge
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editoren
+.vscode/
+.idea/
+*.swp
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+desktop.ini
