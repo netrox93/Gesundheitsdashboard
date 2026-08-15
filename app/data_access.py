@@ -16,7 +16,6 @@ import streamlit as st
 # Für bestehende Importe aus den Seiten weiterhin verfügbar
 from metrics_core import (  # noqa: F401
     BASELINE_WINDOW,
-    DB_PATH,
     MAD_TO_SD,
     MIN_BASELINE_DAYS,
     add_baseline,

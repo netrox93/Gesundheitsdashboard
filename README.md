@@ -98,6 +98,28 @@ Auf der Kommandozeile geht dasselbe mit:
 python app/einlesen.py /pfad/zu/Export.zip
 ```
 
+## Datenbank an einem anderen Ort
+
+Standardmässig liegt die Datenbank unter `data/health.db` im Projektordner.
+Über den Reiter **Datenbank** auf der Seite *Daten einlesen* lässt sich
+stattdessen eine bestehende Datei verwenden:
+
+- **Verknüpfen** - die Datei bleibt, wo sie ist (externe Platte,
+  Cloud-Ordner, Netzlaufwerk), das Dashboard greift nur darauf zu
+- **In den Projektordner kopieren** - legt eine Kopie unter
+  `data/health.db` an; eine dort vorhandene Datenbank wird vorher als
+  `health.db.alt` gesichert
+- **Sicherungskopie anlegen** - kopiert die aktuelle Datenbank an einen
+  frei wählbaren Ort
+
+So lässt sich eine fertige Auswertung auf einen anderen Rechner mitnehmen,
+ohne den Export erneut einzulesen. Vor dem Verknüpfen wird geprüft, ob die
+Datei wirklich eine SQLite-Datenbank dieses Projekts ist - eine falsch
+gewählte Datei fällt sofort auf statt später als unverständlicher Fehler.
+
+Der gewählte Pfad steht in `config/einstellungen.json` und ist von der
+Versionskontrolle ausgeschlossen, weil er rechnerabhängig ist.
+
 ## Mehrere Personen
 
 Jede Person braucht eine eigene Kopie des Ordners, weil die Datenbank unter
@@ -150,6 +172,7 @@ Aggregate (von `build_daily.py` befüllt, Basis fürs Dashboard):
 | --- | --- |
 | `daily_metrics` | pro Tag und Typ: Anzahl, Summe, Schnitt, Min, Max |
 | `daily_sleep` | pro Nacht: Schlafphasen in Minuten, Zubettgeh- und Aufwachzeit |
+| `profil` | Geburtsdatum und Geschlecht für die Referenzbereiche |
 
 Die Aggregate existieren aus Performancegründen: `records` hat bei sechs
 Jahren Watch-Daten mehrere Millionen Zeilen, direkte Abfragen darauf sind
@@ -209,6 +232,7 @@ zeigen würde, der allein auf der geänderten Messmethode beruht.
 ```
 app/
   schema.sql             SQLite-Schema
+  einstellungen.py       Ort der Datenbank, Prüfung beim Verknüpfen
   einlesen.py            Kompletter Einlese-Vorgang (Kommandozeile)
   pipeline.py            Ablauf: entpacken, importieren, aggregieren
   profil.py              Geburtsdatum und Geschlecht
@@ -231,6 +255,8 @@ imports/
   (Ablage für den Export, nicht in Git)
 exports/
   (erzeugte PDF-Berichte, nicht in Git)
+config/
+  einstellungen.json     (rechnerabhängige Pfade, nicht in Git)
 Gesundheitsdashboard starten.bat   One-Klick-Start unter Windows
 ```
 
@@ -324,7 +350,7 @@ passenden Diagrammfarben in `app/charts.py` (Bildschirm) und
 ```bash
 ruff check .              # Linter
 ruff format --check .     # Formatierung
-pytest                    # 78 Tests
+pytest                    # 92 Tests
 python tools/check_pages.py   # laedt jede Dashboard-Seite einmal
 ```
 

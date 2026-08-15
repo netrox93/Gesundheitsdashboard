@@ -22,7 +22,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from xml.etree.ElementTree import iterparse
 
-DB_PATH = Path(__file__).parent.parent / "data" / "health.db"
+import einstellungen
+
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 # Einheiten-Umrechnung für Workout-Distanzen auf km
@@ -52,8 +53,9 @@ def apply_migrations(conn: sqlite3.Connection) -> None:
 
 
 def get_connection() -> sqlite3.Connection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    pfad = einstellungen.db_pfad()
+    pfad.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(pfad)
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     apply_migrations(conn)
     return conn
@@ -235,7 +237,7 @@ def main() -> None:
         f"Fertig: {counts['seen']} Records gelesen, {counts['records']} neu; "
         f"{counts['workouts']} Workouts neu, {counts['summaries']} Aktivitaetstage."
     )
-    print(f"DB liegt unter: {DB_PATH}")
+    print(f"DB liegt unter: {einstellungen.db_pfad()}")
     print("Naechster Schritt: python app/build_daily.py")
 
 

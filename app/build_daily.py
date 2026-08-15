@@ -15,7 +15,8 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "data" / "health.db"
+import einstellungen
+
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 # Messwerte, die über den Tag aufsummiert gehören (Schritte, Kalorien, ...)
@@ -196,12 +197,13 @@ def build_daily_sleep(conn: sqlite3.Connection) -> int:
 
 
 def main() -> None:
-    if not DB_PATH.exists():
-        print(f"Keine Datenbank gefunden unter {DB_PATH}")
+    db_pfad = einstellungen.db_pfad()
+    if not db_pfad.exists():
+        print(f"Keine Datenbank gefunden unter {db_pfad}")
         print("Erst einen Export importieren: python app/import_export.py ...")
         raise SystemExit(1)
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(db_pfad)
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
 
     n_metrics = build_daily_metrics(conn)

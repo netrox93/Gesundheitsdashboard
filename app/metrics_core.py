@@ -7,11 +7,10 @@ Dashboard als auch im PDF-Export (Kommandozeile) läuft.
 import sqlite3
 from pathlib import Path
 
+import einstellungen
 import numpy as np
 import pandas as pd
 from reference_ranges import METRICS
-
-DB_PATH = Path(__file__).parent.parent / "data" / "health.db"
 
 # Skalierung der MAD zu einem Schätzer für die Standardabweichung
 # einer Normalverteilung
@@ -21,12 +20,20 @@ BASELINE_WINDOW = 90
 MIN_BASELINE_DAYS = 20
 
 
-def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
-    return sqlite3.connect(db_path, check_same_thread=False)
+def connect(db_path: Path = None) -> sqlite3.Connection:
+    """Verbindung zur konfigurierten Datenbank.
+
+    Der Pfad wird bei jedem Aufruf frisch geholt, damit ein Wechsel der
+    Datenbank im Dashboard sofort wirkt.
+    """
+    pfad = Path(db_path) if db_path else einstellungen.db_pfad()
+    pfad.parent.mkdir(parents=True, exist_ok=True)
+    return sqlite3.connect(pfad, check_same_thread=False)
 
 
-def db_exists(db_path: Path = DB_PATH) -> bool:
-    return Path(db_path).exists()
+def db_exists(db_path: Path = None) -> bool:
+    pfad = Path(db_path) if db_path else einstellungen.db_pfad()
+    return pfad.exists()
 
 
 # ------------------------------------------------------------------

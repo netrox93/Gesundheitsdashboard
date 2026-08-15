@@ -1,5 +1,6 @@
 # Gesundheitsdaten - dürfen niemals ins Repository
 data/
+config/
 imports/
 exports/
 *.db
