@@ -6,3 +6,12 @@ primaryColor = "#2C5F8A"
 backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F2F6F9"
 textColor = "#22303C"
+
+[server]
+# Der Standard von 200 MB reicht fuer einen mehrjaehrigen Health-Export
+# nicht. Der Weg ueber den Auswahldialog ist trotzdem der bessere - beim
+# Upload puffert Streamlit die Datei im Arbeitsspeicher.
+maxUploadSize = 2048
+
+[browser]
+gatherUsageStats = false

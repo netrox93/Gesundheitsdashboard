@@ -26,17 +26,31 @@ st.set_page_config(page_title="Gesundheitsdashboard", page_icon="", layout="wide
 st.title("Gesundheitsdashboard")
 
 if not da.db_exists():
-    st.error(
-        "Keine Datenbank gefunden. Erst den Export importieren:\n\n"
-        "`python app/import_export.py imports/apple_health_export/Export.xml`\n\n"
-        "und anschliessend `python app/build_daily.py` ausführen."
+    st.info("Willkommen. Es sind noch keine Daten eingelesen.")
+
+    st.markdown(
+        """
+### So geht es los
+
+1. Auf dem iPhone die **Health-App** öffnen
+2. Oben rechts auf das **Profilbild** tippen
+3. Ganz unten **"Alle Gesundheitsdaten exportieren"** wählen
+4. Die entstehende `Export.zip` auf diesen Rechner übertragen
+5. Hier auf **Daten einlesen** gehen - dort lässt sich der Export
+   automatisch suchen oder über den gewohnten Dateidialog auswählen
+
+Die Daten bleiben vollständig auf diesem Rechner.
+"""
     )
+
+    if hasattr(st, "page_link"):
+        st.page_link("pages/1_Daten_einlesen.py", label="Zu 'Daten einlesen'", icon=None)
+    else:
+        st.caption("Die Seite steht links in der Navigation.")
+
     st.stop()
 
-start, end = da.data_range()
-if start is None:
-    st.warning("Die Datenbank enthält noch keine Tageswerte. `app/build_daily.py` ausführen.")
-    st.stop()
+start, end = da.datenbestand_oder_stopp()
 
 profil = da.load_profil()
 

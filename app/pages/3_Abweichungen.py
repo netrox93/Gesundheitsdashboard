@@ -19,11 +19,7 @@ from reference_ranges import DISCLAIMER, KONTEXT_METRICS, METRICS, SCHWELLE_STAN
 st.set_page_config(page_title="Abweichungen", layout="wide")
 st.title("Abweichungen")
 
-if not da.db_exists():
-    st.error("Keine Datenbank gefunden. Erst importieren und `build_daily.py` ausführen.")
-    st.stop()
-
-start, end = da.data_range()
+start, end = da.datenbestand_oder_stopp()
 
 st.markdown(
     "Ein Tag gilt hier als auffällig, wenn er stark von **deiner eigenen** "

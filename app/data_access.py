@@ -62,6 +62,34 @@ def data_range() -> tuple:
     return core.data_range(get_connection())
 
 
+def datenbestand_oder_stopp() -> tuple:
+    """Zeitraum der Daten - oder geordneter Abbruch der Seite.
+
+    Fängt zwei Zustände ab, die sonst mitten in der Seite als
+    unverständlicher Fehler auftauchen: gar keine Datenbank, und eine
+    Datenbank ohne Tageswerte (etwa nach dem Einlesen eines leeren
+    Exports oder einem abgebrochenen Import).
+    """
+    if not db_exists():
+        st.error(
+            "Noch keine Daten vorhanden. Auf der Seite **Daten einlesen** "
+            "den Health-Export einlesen."
+        )
+        st.stop()
+
+    start, ende = data_range()
+    if start is None:
+        st.warning(
+            "Die Datenbank enthält keine auswertbaren Tageswerte. Das kommt "
+            "vor, wenn der eingelesene Export keine Messwerte enthielt oder "
+            "der Import abgebrochen wurde. Bitte auf der Seite **Daten "
+            "einlesen** einen vollständigen Export einlesen."
+        )
+        st.stop()
+
+    return start, ende
+
+
 @st.cache_data(ttl=60)
 def load_profil() -> dict:
     """Profil (Geburtsdatum, Geschlecht) für die Referenzbereiche.

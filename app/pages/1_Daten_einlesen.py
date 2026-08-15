@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import data_access as da
+import dateiauswahl
 import einstellungen
 import metrics_core as core
 import pandas as pd
@@ -65,102 +66,207 @@ with tab_export:
     with st.expander("Wie komme ich an meinen Export?", expanded=not da.db_exists()):
         st.markdown(
             """
-1. Auf dem iPhone die **Health-App** öffnen (weisses Symbol mit rotem Herz)
+1. Auf dem iPhone die **Health-App** oeffnen (weisses Symbol mit rotem Herz)
 2. Oben rechts auf das **Profilbild** tippen
-3. Ganz unten **"Alle Gesundheitsdaten exportieren"** wählen
+3. Ganz unten **"Alle Gesundheitsdaten exportieren"** waehlen
 4. Der Export dauert einige Minuten. Danach die Datei **`Export.zip`**
-   auf diesen Rechner übertragen - per AirDrop, Mail an sich selbst,
+   auf diesen Rechner uebertragen - per AirDrop, Mail an sich selbst,
    Kabel oder Cloud-Ordner
-5. Unten die ZIP-Datei auswählen und einlesen
 
-Die Daten bleiben dabei vollständig auf diesem Rechner. Es wird nichts
+Die Daten bleiben dabei vollstaendig auf diesem Rechner. Es wird nichts
 hochgeladen oder verschickt.
 """
         )
 
-    quelle_art = st.radio(
-        "Woher kommen die Daten?",
-        ["ZIP-Datei hochladen", "Pfad auf diesem Rechner angeben"],
-        horizontal=True,
-    )
+    # Einmal gewaehlte Quelle ueber Klicks hinweg merken
+    quelle = st.session_state.get("quelle")
 
-    quelle = None
+    # --------------------------------------------------------------
+    # Weg 1: automatisch suchen
+    # --------------------------------------------------------------
 
-    if quelle_art == "ZIP-Datei hochladen":
-        hochgeladen = st.file_uploader(
-            "Export.zip auswählen",
-            type=["zip"],
-            help="Die unveränderte Datei aus der Health-App.",
+    st.subheader("1. Export suchen lassen")
+
+    if st.button("Auf diesem Rechner suchen", type="primary"):
+        with st.spinner("Suche in Downloads, auf dem Schreibtisch und an Wechselmedien ..."):
+            st.session_state["treffer"] = dateiauswahl.finde_exporte()
+
+    treffer = st.session_state.get("treffer")
+
+    if treffer is not None:
+        if not treffer:
+            st.warning(
+                "Nichts gefunden. Der Export liegt vermutlich woanders - dann "
+                "unten den Auswahldialog benutzen."
+            )
+        else:
+            st.write(f"{len(treffer)} moegliche Exporte gefunden, neueste zuerst:")
+            for nummer, eintrag in enumerate(treffer):
+                spalte_info, spalte_knopf = st.columns([4, 1])
+                with spalte_info:
+                    st.markdown(
+                        f"**{eintrag['pfad'].name}** ({eintrag['art']}, "
+                        f"{eintrag['groesse_mb']:.0f} MB, "
+                        f"vom {eintrag['geaendert']:%d.%m.%Y})  \n"
+                        f"<span style='color:#647585;font-size:0.85em'>{eintrag['pfad']}</span>",
+                        unsafe_allow_html=True,
+                    )
+                with spalte_knopf:
+                    if st.button("Auswaehlen", key=f"treffer_{nummer}", use_container_width=True):
+                        st.session_state["quelle"] = eintrag["pfad"]
+                        st.rerun()
+
+    # --------------------------------------------------------------
+    # Weg 2: Datei-Dialog des Betriebssystems
+    # --------------------------------------------------------------
+
+    st.subheader("2. Oder selbst auswaehlen")
+
+    if dateiauswahl.dialog_verfuegbar():
+        spalte_datei, spalte_ordner = st.columns(2)
+
+        with spalte_datei:
+            if st.button("Export.zip auswaehlen ...", use_container_width=True):
+                gewaehlt = dateiauswahl.waehle_datei("Export.zip auswaehlen")
+                if gewaehlt:
+                    st.session_state["quelle"] = Path(gewaehlt)
+                    st.rerun()
+
+        with spalte_ordner:
+            if st.button("Entpackten Ordner auswaehlen ...", use_container_width=True):
+                gewaehlt = dateiauswahl.waehle_datei(
+                    "Ordner apple_health_export auswaehlen", ordner=True
+                )
+                if gewaehlt:
+                    st.session_state["quelle"] = Path(gewaehlt)
+                    st.rerun()
+
+        st.caption(
+            "Oeffnet den gewohnten Auswahldialog. Er erscheint als eigenes "
+            "Fenster - unter Umstaenden hinter dem Browser."
         )
+    else:
+        st.caption(
+            "Auf diesem System steht kein Auswahldialog zur Verfuegung "
+            "(kein grafischer Arbeitsplatz). Bitte den Pfad unten eintragen."
+        )
+
+    with st.expander("Pfad von Hand eintragen"):
+        eingabe = st.text_input(
+            "Pfad zur Export.zip oder zum entpackten Ordner",
+            placeholder="C:\\Users\\Name\\Downloads\\Export.zip",
+            help="Anfuehrungszeichen aus 'Als Pfad kopieren' duerfen drin bleiben.",
+        )
+        if eingabe:
+            bereinigt = Path(dateiauswahl.bereinige_pfad(eingabe))
+            if bereinigt.exists():
+                if st.button("Diesen Pfad verwenden"):
+                    st.session_state["quelle"] = bereinigt
+                    st.rerun()
+            else:
+                st.error(f"Nicht gefunden: {bereinigt}")
+
+    with st.expander("Datei hochladen (nur fuer kleine Exporte)"):
+        st.caption(
+            "Der Weg ueber den Browser braucht viel Arbeitsspeicher und ist "
+            "begrenzt. Ein mehrjaehriger Export ist dafuer meist zu gross - "
+            "dann die Auswahl oben verwenden."
+        )
+        hochgeladen = st.file_uploader("Export.zip", type=["zip"])
         if hochgeladen is not None:
             ziel = BASIS / "imports" / "Export.zip"
             ziel.parent.mkdir(parents=True, exist_ok=True)
             with open(ziel, "wb") as datei:
                 datei.write(hochgeladen.getbuffer())
-            quelle = ziel
-            st.success(f"Datei übernommen ({ziel.stat().st_size / 1024**2:.0f} MB).")
+            st.session_state["quelle"] = ziel
+            st.rerun()
+
+    # --------------------------------------------------------------
+    # Weg 3: einlesen
+    # --------------------------------------------------------------
+
+    st.divider()
+    st.subheader("3. Einlesen")
+
+    if not quelle:
+        st.info("Noch nichts ausgewaehlt. Oben suchen lassen oder Datei auswaehlen.")
     else:
-        eingabe = st.text_input(
-            "Pfad zur Export.zip oder zum entpackten Ordner",
-            value=str(BASIS / "imports"),
-            help="Zum Beispiel C:\\Users\\Name\\Downloads\\Export.zip",
-        )
-        if eingabe:
-            pfad = Path(eingabe)
-            if pfad.exists():
-                quelle = pfad
-            else:
-                st.error("Pfad nicht gefunden.")
+        st.success(f"Ausgewaehlt: **{quelle.name}**")
+        st.caption(str(quelle))
 
-    mit_ekg = st.checkbox("EKG-Aufzeichnungen mit einlesen", value=True)
+        mit_ekg = st.checkbox("EKG-Aufzeichnungen mit einlesen", value=True)
 
-    if quelle and st.button("Daten einlesen", type="primary"):
-        balken = st.progress(0.0)
-        status = st.empty()
+        spalte_los, spalte_weg = st.columns([1, 3])
 
-        def melde(text: str, anteil: float) -> None:
-            status.write(text)
-            balken.progress(min(1.0, anteil))
+        with spalte_weg:
+            if st.button("Andere Datei waehlen"):
+                st.session_state.pop("quelle", None)
+                st.rerun()
 
-        try:
-            ergebnis = pipeline.einlesen(quelle, fortschritt=melde, mit_ekg=mit_ekg)
-        except pipeline.EinleseFehler as fehler:
+        with spalte_los:
+            starten = st.button("Jetzt einlesen", type="primary", use_container_width=True)
+
+        if starten:
+            balken = st.progress(0.0)
+            status = st.empty()
+
+            def melde(text: str, anteil: float) -> None:
+                status.write(text)
+                balken.progress(min(1.0, anteil))
+
+            try:
+                ergebnis = pipeline.einlesen(quelle, fortschritt=melde, mit_ekg=mit_ekg)
+            except pipeline.EinleseFehler as fehler:
+                balken.empty()
+                status.empty()
+                st.error(str(fehler))
+                st.stop()
+            except Exception as fehler:  # noqa: BLE001
+                balken.empty()
+                status.empty()
+                st.error(f"Beim Einlesen ist ein Fehler aufgetreten: {fehler}")
+                st.stop()
+
+            leere_zwischenspeicher()
             balken.empty()
             status.empty()
-            st.error(str(fehler))
-            st.stop()
-        except Exception as fehler:  # noqa: BLE001
-            balken.empty()
-            status.empty()
-            st.error(f"Beim Einlesen ist ein Fehler aufgetreten: {fehler}")
-            st.stop()
 
-        leere_zwischenspeicher()
-        balken.empty()
-        status.empty()
-
-        zahlen = ergebnis["messwerte"]
-        st.success(
-            (
+            zahlen = ergebnis["messwerte"]
+            bericht = (
                 f"{zahlen['seen']:,} Messwerte gelesen, davon {zahlen['records']:,} neu. "
-                f"{zahlen['workouts']} Trainings, {zahlen['summaries']} Aktivitätstage, "
-                f"{ergebnis['tageswerte']:,} Tageswerte, {ergebnis['naechte']} Nächte."
+                f"{zahlen['workouts']} Trainings, {zahlen['summaries']} Aktivitaetstage, "
+                f"{ergebnis['tageswerte']:,} Tageswerte, {ergebnis['naechte']} Naechte."
             ).replace(",", ".")
-        )
 
-        if ergebnis.get("ekg"):
-            st.success(f"{ergebnis['ekg']['neu']} EKG-Aufzeichnungen eingelesen.")
+            if zahlen["seen"] == 0:
+                # Kein Erfolg, auch wenn technisch nichts schiefging
+                st.warning(
+                    "In der ausgewaehlten Datei standen keine Messwerte. "
+                    "Moeglicherweise wurde der Export abgebrochen oder es "
+                    "wurde die falsche Datei gewaehlt - erwartet wird die "
+                    "`Export.zip` aus der Health-App."
+                )
+            elif zahlen["records"] == 0:
+                st.info(
+                    f"{bericht} Alle Werte waren bereits vorhanden - die "
+                    "Datenbank ist damit schon auf diesem Stand."
+                )
+            else:
+                st.success(bericht)
 
-        if ergebnis.get("profil"):
-            st.success("Profil aus dem Export übernommen.")
-        else:
-            st.warning(
-                "Im Export standen keine Angaben zu Geburtsdatum und Geschlecht. "
-                "Bitte im Reiter *Profil* von Hand eintragen, damit die alters- "
-                "und geschlechtsabhängigen Referenzbereiche stimmen."
-            )
+            if ergebnis.get("ekg"):
+                st.success(f"{ergebnis['ekg']['neu']} EKG-Aufzeichnungen eingelesen.")
 
-        st.info("Die Auswertung ist jetzt in der linken Navigation verfügbar.")
+            if ergebnis.get("profil"):
+                st.success("Profil aus dem Export uebernommen.")
+            else:
+                st.warning(
+                    "Im Export standen keine Angaben zu Geburtsdatum und Geschlecht. "
+                    "Bitte im Reiter *Profil* von Hand eintragen, damit die alters- "
+                    "und geschlechtsabhaengigen Referenzbereiche stimmen."
+                )
+
+            st.info("Die Auswertung ist jetzt in der linken Navigation verfuegbar.")
 
 # ==================================================================
 # Datenbank

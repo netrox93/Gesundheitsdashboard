@@ -15,11 +15,7 @@ from reference_ranges import DISCLAIMER
 st.set_page_config(page_title="Sport und Schlaf", layout="wide")
 st.title("Sport und Schlaf")
 
-if not da.db_exists():
-    st.error("Keine Datenbank gefunden. Erst importieren und `build_daily.py` ausführen.")
-    st.stop()
-
-start, end = da.data_range()
+start, end = da.datenbestand_oder_stopp()
 
 tab_sport, tab_schlaf = st.tabs(["Sport", "Schlaf"])
 

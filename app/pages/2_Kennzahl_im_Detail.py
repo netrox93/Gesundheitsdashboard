@@ -20,11 +20,7 @@ from reference_ranges import (
 st.set_page_config(page_title="Kennzahl im Detail", layout="wide")
 st.title("Kennzahl im Detail")
 
-if not da.db_exists():
-    st.error("Keine Datenbank gefunden. Erst importieren und `build_daily.py` ausführen.")
-    st.stop()
-
-start, end = da.data_range()
+start, end = da.datenbestand_oder_stopp()
 profil = da.load_profil()
 
 # ------------------------------------------------------------------

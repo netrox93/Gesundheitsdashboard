@@ -20,11 +20,7 @@ from reference_ranges import DISCLAIMER, METRICS
 st.set_page_config(page_title="Zusammenhänge", layout="wide")
 st.title("Zusammenhänge")
 
-if not da.db_exists():
-    st.error("Keine Datenbank gefunden. Erst importieren und `build_daily.py` ausführen.")
-    st.stop()
-
-start, end = da.data_range()
+start, end = da.datenbestand_oder_stopp()
 
 with st.sidebar:
     st.header("Kennzahlen")

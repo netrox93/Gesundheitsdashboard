@@ -82,12 +82,26 @@ python -m venv .venv
 2. Oben rechts auf das **Profilbild** tippen
 3. Ganz unten **"Alle Gesundheitsdaten exportieren"** wählen
 4. Die entstehende `Export.zip` auf den Rechner übertragen
-5. Im Dashboard auf die Seite **Daten einlesen** gehen, Datei auswählen,
-   Knopf drücken
+5. Im Dashboard auf die Seite **Daten einlesen** gehen
+
+Dort führen drei Wege zum Ziel, ohne dass ein Pfad getippt werden muss:
+
+- **Suchen lassen** - durchsucht Downloads, Schreibtisch, Dokumente und
+  angeschlossene Wechseldatenträger und bietet die Fundstellen zum
+  Anklicken an, neueste zuerst
+- **Auswahldialog** - der gewohnte Dateidialog des Betriebssystems, für
+  ZIP-Datei oder entpackten Ordner
+- **Pfad eintragen** - als Rückfalloption; Anführungszeichen aus Windows'
+  "Als Pfad kopieren" und `file:///`-URLs werden dabei toleriert
 
 Der Rest passiert automatisch: entpacken, Profil lesen, Messwerte
 importieren, Tagesaggregate berechnen, EKGs einlesen. Ein Export mit rund
 4,5 Millionen Messwerten braucht dafür etwa eine Minute.
+
+Der Weg über den Browser-Upload existiert ebenfalls, ist aber nur für
+kleine Exporte sinnvoll: Streamlit puffert die Datei dabei im
+Arbeitsspeicher. Ein mehrjähriger Export ist dafür meist zu gross -
+deshalb ist die Auswahl per Dialog der empfohlene Weg.
 
 Ein späterer Export kann jederzeit erneut eingelesen werden - bereits
 vorhandene Werte werden übersprungen, nur Neues kommt dazu.
@@ -232,6 +246,7 @@ zeigen würde, der allein auf der geänderten Messmethode beruht.
 ```
 app/
   schema.sql             SQLite-Schema
+  dateiauswahl.py        Export finden, Dateidialog, Pfadaufbereitung
   einstellungen.py       Ort der Datenbank, Prüfung beim Verknüpfen
   einlesen.py            Kompletter Einlese-Vorgang (Kommandozeile)
   pipeline.py            Ablauf: entpacken, importieren, aggregieren
@@ -350,7 +365,7 @@ passenden Diagrammfarben in `app/charts.py` (Bildschirm) und
 ```bash
 ruff check .              # Linter
 ruff format --check .     # Formatierung
-pytest                    # 92 Tests
+pytest                    # 110 Tests
 python tools/check_pages.py   # laedt jede Dashboard-Seite einmal
 ```
 
