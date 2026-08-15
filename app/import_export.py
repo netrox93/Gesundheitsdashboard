@@ -18,7 +18,7 @@ neu zu berechnen.
 
 import sqlite3
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree.ElementTree import iterparse
 
@@ -206,7 +206,7 @@ def protokolliere(conn: sqlite3.Connection, xml_path: Path, counts: dict) -> Non
         """,
         (
             Path(xml_path).name,
-            datetime.now(UTC).isoformat(),
+            datetime.now(timezone.utc).isoformat(),
             counts["seen"],
             counts["records"],
             counts["workouts"],

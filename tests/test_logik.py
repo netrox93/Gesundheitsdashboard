@@ -6,7 +6,7 @@ die Serien-Erkennung.
 """
 
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -20,7 +20,7 @@ from build_daily import _merged_minutes, _parse_ts  # noqa: E402
 
 
 def ts(tag: int, stunde: int, minute: int = 0) -> datetime:
-    return datetime(2025, 3, tag, stunde, minute, tzinfo=UTC)
+    return datetime(2025, 3, tag, stunde, minute, tzinfo=timezone.utc)
 
 
 # ------------------------------------------------------------------

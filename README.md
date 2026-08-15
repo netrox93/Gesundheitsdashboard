@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/netrox93/Gesundheitsdashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/netrox93/Gesundheitsdashboard/actions/workflows/ci.yml)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 
 Wertet den Export der Apple-Health-App aus - lokal auf dem eigenen Rechner.
 Zeigt Langzeitverläufe über Jahre, vergleicht sie mit Referenzbereichen aus
@@ -64,9 +64,13 @@ vor dem Weitergeben entsprechend prüfen.
 
 Beim ersten Start richtet sich die Umgebung selbst ein (dauert ein paar
 Minuten), danach öffnet sich das Dashboard im Browser. Voraussetzung ist
-eine Python-Installation ab Version 3.11 von
+eine Python-Installation ab Version 3.9 von
 [python.org](https://www.python.org/downloads/) - dort bei der Installation
 den Haken bei *"Add python.exe to PATH"* setzen.
+
+Sind mehrere Python-Versionen installiert, wählt die Startdatei die
+neueste. Eine unvollständige Umgebung aus einem früheren Versuch wird
+erkannt und neu aufgebaut.
 
 **macOS/Linux:**
 
@@ -161,7 +165,7 @@ Ohne Profil wird für VO2max gar kein Bereich angezeigt.
 
 ## Voraussetzungen
 
-- Python 3.11 oder neuer
+- Python 3.9 oder neuer (getestet bis 3.14)
 - Ein Apple-Health-Export (iPhone, optional mit Apple Watch)
 - Rund 2 GB freier Speicher bei einem mehrjährigen Datenbestand
 
@@ -369,8 +373,10 @@ pytest                    # 110 Tests
 python tools/check_pages.py   # laedt jede Dashboard-Seite einmal
 ```
 
-Dieselben vier Schritte laufen bei jedem Push in der CI, gegen Python 3.11,
-3.12 und 3.13.
+Dieselben vier Schritte laufen bei jedem Push in der CI, gegen Python 3.9,
+3.11 und 3.13. Die älteste unterstützte Version läuft bewusst mit -
+Konstrukte aus neueren Versionen (etwa `datetime.UTC` ab Python 3.11)
+würden sonst erst beim Nutzer auffallen.
 
 Die Tests decken die Stellen ab, an denen stille Fehler entstehen: die
 Vereinigung überlappender Schlafsegmente, die robuste Baseline-Berechnung,

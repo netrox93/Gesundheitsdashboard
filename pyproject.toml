@@ -3,7 +3,7 @@ name = "gesundheitsdashboard"
 version = "0.1.0"
 description = "Auswertung von Apple-Health-Exporten: Langzeitverläufe, Referenzbereiche, EKG und Arztbericht"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
 keywords = ["apple-health", "healthkit", "quantified-self", "ekg", "streamlit"]
 
@@ -25,7 +25,7 @@ dev = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [
