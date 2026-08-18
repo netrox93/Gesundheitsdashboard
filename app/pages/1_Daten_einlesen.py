@@ -257,14 +257,6 @@ hochgeladen oder verschickt.
             if ergebnis.get("ekg"):
                 st.success(f"{ergebnis['ekg']['neu']} EKG-Aufzeichnungen eingelesen.")
 
-            if ergebnis.get("routen"):
-                anzahl = ergebnis["routen"]
-                st.success(
-                    f"{anzahl['neu']} Routen eingelesen ({anzahl['punkte']:,} GPS-Punkte).".replace(
-                        ",", "."
-                    )
-                )
-
             if ergebnis.get("profil"):
                 st.success("Profil aus dem Export uebernommen.")
             else:

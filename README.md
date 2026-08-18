@@ -58,9 +58,6 @@ und Geschlecht gespeichert.
 Der erzeugte PDF-Bericht enthält Alter, Geschlecht und Gesundheitsdaten -
 vor dem Weitergeben entsprechend prüfen.
 
-Für die aufgezeichneten Routen gilt das besonders: GPX-Tracks zeigen die
-Wohnadresse. Deshalb ist ein Heimatpunkt mit Ausblendungsradius
-standardmässig aktiv, siehe [Routen](#routen).
 
 ## Schnellstart
 
@@ -187,8 +184,6 @@ Rohdaten:
 | `workouts` | Trainingseinheiten mit Dauer, Distanz, Kalorien |
 | `activity_summaries` | Aktivitätsringe pro Tag inkl. Tagesziele |
 | `ecg` | EKG-Aufzeichnungen: Metadaten, Messwerte und Rohsignal |
-| `routen` | GPX-Touren: Distanz, Dauer, Höhenmeter, Grenzen |
-| `routen_punkte` | einzelne GPS-Punkte je Route |
 
 Aggregate (von `build_daily.py` befüllt, Basis fürs Dashboard):
 
@@ -213,7 +208,6 @@ Aufwachens zugeordnet, damit sie sich mit dem Folgetag verknüpfen lässt.
 | Zusammenhänge | Zwei Kennzahlen mit einstellbarem Zeitversatz, inkl. Versatz-Profil |
 | Sport und Schlaf | Trainingsbelastung nach Sportart, Schlafphasen, Regelmässigkeit |
 | EKG | Aufzeichnungen ansehen, Kurve im klinischen Massstab, Frequenzmessung |
-| Routen | Aufgezeichnete Touren auf OpenStreetMap, Heatmap, Höhenprofil, GPX-Export |
 | Arztbericht | PDF-Bericht erzeugen und herunterladen |
 
 ### Zwei Arten von Referenzbereichen
@@ -258,8 +252,6 @@ zeigen würde, der allein auf der geänderten Messmethode beruht.
 app/
   schema.sql             SQLite-Schema
   dateiauswahl.py        Export finden, Dateidialog, Pfadaufbereitung
-  routen.py              GPX einlesen, vermessen, Heimat-Kürzung
-  karten.py              OpenStreetMap-Karten und Heatmap (folium)
   einstellungen.py       Ort der Datenbank, Prüfung beim Verknüpfen
   einlesen.py            Kompletter Einlese-Vorgang (Kommandozeile)
   pipeline.py            Ablauf: entpacken, importieren, aggregieren
@@ -276,7 +268,7 @@ app/
   pdf_data.py            Inhalte für den Bericht
   charts.py              Diagramme und Infoboxen
   dashboard.py           Startseite (Status)
-  pages/                 Seiten 1-8
+  pages/                 Seiten 1-7
 data/
   health.db              SQLite-Datenbank (lokal, nicht in Git)
 imports/
@@ -329,47 +321,6 @@ Zwei Fallstricke, die in der Umsetzung berücksichtigt sind:
 Name und Geburtsdatum stehen in den CSV-Dateien, werden aber bewusst nicht
 in die Datenbank übernommen.
 
-## Routen
-
-Der Export enthält zu jedem Outdoor-Training eine GPX-Datei im Ordner
-`workout-routes`. Sie werden beim Einlesen automatisch übernommen und
-über den Startzeitpunkt mit den Trainings verknüpft, sodass jede Tour
-ihre Sportart kennt.
-
-Die Seite *Routen* zeigt:
-
-- **Karte** mit allen Touren der Auswahl, Farbe nach Sportart
-- **Heatmap** aller Touren übereinander - zeigt die eigenen
-  Standardstrecken
-- **Einzelne Tour** mit Höhenprofil und GPX-Download
-- **Tabelle** mit Jahresauswertung nach Sportart
-
-Kartendaten von OpenStreetMap. Die Kacheln werden beim Anzeigen von den
-OSM-Servern geladen; die Routendaten selbst verlassen den Rechner nicht.
-
-### Wohnadresse ausblenden
-
-GPX-Tracks beginnen und enden fast immer an der Wohnadresse - der
-heikelste Teil dieser Daten. Deshalb lässt sich ein Heimatpunkt mit
-Radius hinterlegen (standardmässig aktiv, 500 m): Anfang und Ende jeder
-Route werden abgeschnitten, solange sie im Umkreis liegen. Auch der
-GPX-Download ist entsprechend gekürzt.
-
-Bewusst wird nur an Anfang und Ende geschnitten, nicht in der Mitte - wer
-im Verlauf einer Tour an seinem Wohnort vorbeifährt, bekommt sonst eine
-zerrissene Route.
-
-### Umgang mit GPS-Ungenauigkeit
-
-Zwei Filter, ohne die die Kennzahlen systematisch zu hoch ausfallen:
-
-- Punkte mit einer gemeldeten Genauigkeit schlechter als 50 m gehen
-  nicht in die Distanz ein, ebenso Sprünge über 150 km/h
-- Höhenmeter werden erst ab 5 m Unterschied zur zuletzt übernommenen
-  Höhe gezählt. Verglichen wird gegen die letzte *übernommene* Höhe, nicht
-  gegen den Vorgängerpunkt - dadurch geht auch ein flacher, stetiger
-  Anstieg vollständig ein, während Höhenrauschen herausfällt
-
 ## PDF-Bericht für den Arztbesuch
 
 Über die Seite "Arztbericht" im Dashboard oder auf der Kommandozeile:
@@ -419,7 +370,7 @@ passenden Diagrammfarben in `app/charts.py` (Bildschirm) und
 ```bash
 ruff check .              # Linter
 ruff format --check .     # Formatierung
-pytest                    # 139 Tests
+pytest                    # 109 Tests
 python tools/check_pages.py   # laedt jede Dashboard-Seite einmal
 ```
 

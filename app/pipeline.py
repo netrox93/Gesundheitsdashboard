@@ -20,7 +20,6 @@ import ecg
 import import_export
 import metrics_core as core
 import profil as profil_modul
-import routen as routen_modul
 
 BASIS = Path(__file__).parent.parent
 IMPORT_ORDNER = BASIS / "imports"
@@ -62,12 +61,7 @@ def finde_export(pfad: Path) -> dict:
         )
 
     ekg_ordner = xml.parent / "electrocardiograms"
-    routen_ordner = xml.parent / "workout-routes"
-    return {
-        "xml": xml,
-        "ekg": ekg_ordner if ekg_ordner.is_dir() else None,
-        "routen": routen_ordner if routen_ordner.is_dir() else None,
-    }
+    return {"xml": xml, "ekg": ekg_ordner if ekg_ordner.is_dir() else None}
 
 
 def entpacke(zip_pfad: Path, ziel: Path = None) -> Path:
@@ -137,16 +131,10 @@ def einlesen(quelle: Path, fortschritt=None, mit_ekg: bool = True) -> dict:
     ergebnis["naechte"] = build_daily.build_daily_sleep(conn)
 
     if mit_ekg and gefunden["ekg"]:
-        melde("Lese EKG-Aufzeichnungen ein ...", 0.90)
+        melde("Lese EKG-Aufzeichnungen ein ...", 0.92)
         ergebnis["ekg"] = ecg.importiere(gefunden["ekg"], conn)
     else:
         ergebnis["ekg"] = None
-
-    if gefunden["routen"]:
-        melde("Lese aufgezeichnete Routen ein ...", 0.95)
-        ergebnis["routen"] = routen_modul.importiere(gefunden["routen"], conn)
-    else:
-        ergebnis["routen"] = None
 
     conn.close()
     melde("Fertig.", 1.0)

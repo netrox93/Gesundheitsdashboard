@@ -47,10 +47,6 @@ def main() -> None:
     if ergebnis.get("ekg"):
         print(f"EKG-Aufzeichnungen:  {ergebnis['ekg']['neu']} neu")
 
-    if ergebnis.get("routen"):
-        r = ergebnis["routen"]
-        print(f"Routen:              {r['neu']} neu ({r['punkte']:,} Punkte)".replace(",", "."))
-
     if ergebnis.get("profil"):
         alter = profil_modul.alter_am(ergebnis["profil"]["geburtsdatum"])
         geschlecht = profil_modul.GESCHLECHT_LABEL.get(

@@ -5,5 +5,4 @@ scipy
 altair
 matplotlib
 reportlab
-folium
 pytest
