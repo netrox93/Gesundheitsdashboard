@@ -60,6 +60,32 @@ def zuruecksetzen() -> None:
     _speichere_konfig(konfig)
 
 
+def lade_heimat() -> dict:
+    """Heimatpunkt für die Datenschutz-Kürzung von Routen.
+
+    Standardmässig aktiv: GPX-Tracks beginnen fast immer an der
+    Wohnadresse, und das ist der heikelste Teil dieser Daten.
+    """
+    konfig = _lade_konfig().get("heimat", {})
+    return {
+        "lat": konfig.get("lat"),
+        "lon": konfig.get("lon"),
+        "radius_m": konfig.get("radius_m", 500),
+        "aktiv": konfig.get("aktiv", True),
+    }
+
+
+def speichere_heimat(lat, lon, radius_m: float = 500, aktiv: bool = True) -> None:
+    konfig = _lade_konfig()
+    konfig["heimat"] = {
+        "lat": lat,
+        "lon": lon,
+        "radius_m": radius_m,
+        "aktiv": aktiv,
+    }
+    _speichere_konfig(konfig)
+
+
 def pruefe_datenbank(pfad) -> dict:
     """Prüft, ob eine Datei eine brauchbare Datenbank dieses Projekts ist.
 
